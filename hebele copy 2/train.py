@@ -6,28 +6,45 @@ import pygame
 from amazing_game_env import AmazingGameEnv
 from dqn_agent import DQNAgent
 
+# Configuration dictionary
+config = {
+    'gamma': 0.99,
+    'epsilon': 1.0,
+    'epsilon_decay': 0.995,
+    'epsilon_min': 0.05,
+    'learning_rate': 0.001,
+    'batch_size': 256,
+    'memory_size': 200000,
+    'update_target_steps': 2000
+}
 
-# Initialize environment and agent
 env = AmazingGameEnv()
-agent = DQNAgent(env)
+agent = DQNAgent(env, config)
 clock = pygame.time.Clock()  # Create a Clock object to control the frame rate
 
-# Hyperparameters
-episodes = 2600
-min_exploration_episodes = 800  # Minimum number of episodes with full exploration
-max_decay_episodes = 1700  # Episodes over which epsilon decays to epsilon_min
-render = False
-save_interval = 100
+# Training hyperparameters
+training_config = {
+    'episodes': 2000,
+    'min_exploration_episodes': 500,
+    'max_decay_episodes': 1400,
+    'render': False,
+    'save_interval': 100,
+    'log_file': "training_log.txt"
+}
 
-# Tracking the best reward
-best_reward = float('-inf')  # Initialize to negative infinity
-
-# Log file
-log_file = "training_log.txt"
+# Load hyperparameters
+episodes = training_config['episodes']
+min_exploration_episodes = training_config['min_exploration_episodes']
+max_decay_episodes = training_config['max_decay_episodes']
+render = training_config['render']
+save_interval = training_config['save_interval']
+log_file = training_config['log_file']
 
 # Clear previous logs
 with open(log_file, "w") as f:
     f.write("Episode, Total Reward, Epsilon, Best Reward\n")
+
+best_reward = float('-inf')  # Initialize to negative infinity
 
 for episode in range(episodes):
     state = env.reset()
@@ -52,7 +69,7 @@ for episode in range(episodes):
 
         state = next_state
         total_reward += reward
-        
+
         if render:
             print(f"State: {state}, Action: {action}, Reward: {reward}, Done: {done}")
             clock.tick(60)  # Limit to 60 frames per second
@@ -61,7 +78,7 @@ for episode in range(episodes):
     if total_reward > best_reward:
         best_reward = total_reward
         model_path = f'./models/dqn_model_best_{best_reward:.2f}.pth'
-        torch.save(agent.model.state_dict(), model_path)
+        agent.save(model_path)
         print(f"New best reward {best_reward:.2f} achieved! Model saved as '{model_path}'")
 
     # Log episode details
@@ -74,8 +91,8 @@ for episode in range(episodes):
     # Save the model periodically
     if (episode + 1) % save_interval == 0:
         model_path = f'./models/dqn_model_{episode + 1}.pth'
-        torch.save(agent.model.state_dict(), model_path)
+        agent.save(model_path)
         print(f"Model saved at episode {episode + 1} as '{model_path}'")
 
-torch.save(agent.model.state_dict(), './models/dqn_model_final.pth')
+agent.save('./models/dqn_model_final.pth')
 print("Training complete. Final model saved as 'dqn_model_final.pth'")

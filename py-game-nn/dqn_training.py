@@ -51,7 +51,7 @@ for episode in range(500):
         state = next_state
         total_reward += reward
 
-        if episode % 10 == 0:
+        if episode % 1 == 0:
             env.render()
 
         if len(replay_buffer) >= batch_size:
@@ -77,3 +77,4 @@ for episode in range(500):
         target_model.load_state_dict(model.state_dict())
 
     print(f"Episode {episode}, Total Reward: {total_reward}")
+

@@ -19,17 +19,16 @@ class DQN(nn.Module):
         x = F.relu(self.fc2(x))
         return self.fc3(x)
 
-
 class DQNAgent:
-    def __init__(self, env, gamma: float = 0.99, epsilon: float = 1.0, epsilon_decay: float = 0.995, epsilon_min: float = 0.05,
-                 learning_rate: float = 0.001, batch_size: int = 16, memory_size: int = 100000):
+    def __init__(self, env, config: dict):
         self.env = env
-        self.gamma = gamma
-        self.epsilon = epsilon
-        self.epsilon_decay = epsilon_decay
-        self.epsilon_min = epsilon_min
-        self.learning_rate = learning_rate
-        self.batch_size = batch_size
+        self.gamma = config.get('gamma', 0.99)
+        self.epsilon = config.get('epsilon', 1.0)
+        self.epsilon_decay = config.get('epsilon_decay', 0.995)
+        self.epsilon_min = config.get('epsilon_min', 0.05)
+        self.learning_rate = config.get('learning_rate', 0.001)
+        self.batch_size = config.get('batch_size', 16)
+        memory_size = config.get('memory_size', 100000)
         self.memory = deque(maxlen=memory_size)
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -42,7 +41,7 @@ class DQNAgent:
         self.target_model.eval()
 
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
-        self.update_target_steps = 1000
+        self.update_target_steps = config.get('update_target_steps', 1000)
         self.step_counter = 0
 
     def remember(self, state: np.ndarray, action: int, reward: float, next_state: np.ndarray, done: bool):
@@ -84,7 +83,6 @@ class DQNAgent:
         self.step_counter += 1
         if self.step_counter % self.update_target_steps == 0:
             self.target_model.load_state_dict(self.model.state_dict())
-
 
     def save(self, filepath: str):
         torch.save(self.model.state_dict(), filepath)
