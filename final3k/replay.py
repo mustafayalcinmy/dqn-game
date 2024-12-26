@@ -6,7 +6,8 @@ from dqn_agent import DQNAgent
 def load_agent(env, model_path):
     agent = DQNAgent(env)
     agent.model.load_state_dict(torch.load(model_path))
-    agent.epsilon = 0 # Set epsilon to 0 to ensure deterministic behavior
+    agent.epsilon = 0 
+    agent.epsilon_min = 0 
     return agent
 
 def play_game(env, agent):
@@ -26,6 +27,6 @@ def play_game(env, agent):
 
 if __name__ == "__main__":
     env = AmazingGameEnv()
-    model_path = './models/dqn_model_best_5260.00.pth'
+    model_path = './models/dqn_model_final.pth'
     agent = load_agent(env, model_path)
     play_game(env, agent)

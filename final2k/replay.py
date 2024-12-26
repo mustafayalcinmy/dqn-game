@@ -26,6 +26,6 @@ def play_game(env, agent):
 
 if __name__ == "__main__":
     env = AmazingGameEnv()
-    model_path = './models/dqn_model_best_5260.00.pth'
+    model_path = './models/dqn_model_best_330.00.pth'
     agent = load_agent(env, model_path)
     play_game(env, agent)
